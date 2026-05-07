@@ -5,17 +5,22 @@ import { io } from "socket.io-client"
 function App() {
   const[socket, setSocket] = useState()
   const[inputMessage, setInputMessage] = useState()
+  const[mensajeRecibido, setMensajeRecibido] = useState([])
 
   useEffect(() =>{
     const newSocket = io("localhost:3002")
     setSocket(setSocket)
+
+    newSocket.on("message",(msg) =>{
+      setMensajeRecibido(msg)
+    })
 
     return () => {
       newSocket.disconnect()
     }
   }, [] )
 
-  const enviar = () => {
+  const enviar = (e) => {
     e.preventDefault()
     if(socket){
       socket.emit("message", inputMessage)
@@ -24,12 +29,17 @@ function App() {
 
   return (
     <div>
-      <form>
-        <input type="text" placeholder="Escribe el mensaje"/>
+      <form onSubmit={enviar}>
+        <input type="text" placeholder="Escribe el mensaje"
         onChange={(e) => setInputMessage(e.target.value)}
         />
         <button type="submit">Enviar</button>
       </form>
+      <ul>
+        {mensajeRecibido.map( mensaje => <li>{mensaje}</li>)
+      }
+      </ul>
+      
     </div>
   )
 
