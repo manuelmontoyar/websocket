@@ -6,6 +6,7 @@ function App() {
   const[socket, setSocket] = useState()
   const[inputMessage, setInputMessage] = useState()
   const[mensajeRecibido, setMensajeRecibido] = useState([])
+  const[user, setUser] = useState([])
 
   useEffect(() =>{
     const newSocket = io("localhost:3002")
@@ -15,6 +16,8 @@ function App() {
       setMensajeRecibido(msg)
     })
 
+    setUser(prompt("Ingrese su nombre"))
+
     return () => {
       newSocket.disconnect()
     }
@@ -23,7 +26,7 @@ function App() {
   const enviar = (e) => {
     e.preventDefault()
     if(socket){
-      socket.emit("message", inputMessage)
+      socket.emit("message", (user, inputMessage))
     }
   }
 
