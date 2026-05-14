@@ -1,51 +1,49 @@
-import { useEffect } from "react"
-import { useState } from "react"
-import { io } from "socket.io-client"
+import { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 
-function App() {
-  const[socket, setSocket] = useState()
-  const[inputMessage, setInputMessage] = useState()
-  const[mensajeRecibido, setMensajeRecibido] = useState([])
-  const[user, setUser] = useState([])
+function App(){
+  const [inputMessage, setInputMessage] = useState("");
+  const [mensajeRecibido, setMensajeRecibido] = useState([]);
+  const [socket, setSocket] = useState();
+  const [user, setUser] = useState("");
+  
+  
+  useEffect(() => {
+    const newSocket = io("localhost:3000");
+    setSocket(newSocket);
 
-  useEffect(() =>{
-    const newSocket = io("localhost:3002")
-    setSocket(setSocket)
-
-    newSocket.on("message",(msg) =>{
-      setMensajeRecibido(msg)
+    newSocket.on("mensaje", (msg) => {
+      setMensajeRecibido(msg);
     })
 
-    setUser(prompt("Ingrese su nombre"))
+    setUser(prompt("Ingrese su nombre: "));
 
-    return () => {
-      newSocket.disconnect()
-    }
-  }, [] )
+    return () => { newSocket.disconnect() }
+  }, []);
 
-  const enviar = (e) => {
-    e.preventDefault()
-    if(socket){
-      socket.emit("message", (user, inputMessage))
-    }
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Como se envían los mensajes...
+    socket.emit("mensaje", {user, inputMessage, fecha: new Date().toLocaleTimeString()});
+
+
+
   }
+
+  
+
 
   return (
     <div>
-      <form onSubmit={enviar}>
-        <input type="text" placeholder="Escribe el mensaje"
-        onChange={(e) => setInputMessage(e.target.value)}
-        />
+      <form onSubmit={handleSubmit}>
+        <input onChange={(e) => setInputMessage(e.target.value)}/>
         <button type="submit">Enviar</button>
       </form>
-      <ul>
-        {mensajeRecibido.map( mensaje => <li>{mensaje}</li>)
-      }
-      </ul>
-      
+      { mensajeRecibido.map( mensaje => <div>{mensaje.user}: {mensaje.inputMessage} ({mensaje.fecha})</div>) }
     </div>
-  )
+  );
+
 
 }
 
-export default App
+export default App;
